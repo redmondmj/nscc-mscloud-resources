@@ -1,0 +1,35 @@
+# Secrets and credentials — never commit these
+*.pem
+*.pfx
+*.p12
+*.key
+*.env
+.env.*
+local.settings.json
+azuredeploy.parameters.json.local
+
+# Bicep param files with secrets
+*secrets*.bicepparam
+
+# Terraform (if used later)
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+crash.log
+
+# PowerShell
+*.ps1xml
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Node (for any tooling scripts)
+node_modules/
