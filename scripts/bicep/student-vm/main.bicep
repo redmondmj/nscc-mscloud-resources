@@ -1,5 +1,8 @@
 // student-vm/main.bicep
 // Deploys a single VM (Windows or Ubuntu) for student lab use.
+//
+// Linux VMs use SSH public key auth by default (matches Lab 01).
+// Windows VMs use password auth (RDP).
 
 @description('Student NSCC ID (e.g. W0123456) — used in resource names.')
 param studentId string
@@ -14,9 +17,15 @@ param osType string = 'ubuntu'
 @description('Admin username for the VM.')
 param adminUsername string
 
-@description('Admin password for the VM.')
+@description('SSH public key for Linux VMs (required when osType = ubuntu). Paste the contents of your id_rsa.pub or id_ed25519.pub.')
+param sshPublicKey string = ''
+
+@description('Admin password for Windows VMs (required when osType = windows). Pass via --parameters or a Key Vault reference — do NOT commit.')
 @secure()
-param adminPassword string
+param adminPassword string = ''
+
+@description('Optional: restrict inbound SSH/RDP to this CIDR. Defaults to * (any). For student labs, prefer your own public IP, e.g. "203.0.113.42/32".')
+param allowedSourceCidr string = '*'
 
 @description('Azure region.')
 param location string = resourceGroup().location
@@ -29,6 +38,7 @@ var nsgName = '${prefix}-nsg'
 var pipName = '${prefix}-pip'
 var nicName = '${prefix}-nic'
 var vmName = prefix
+var isLinux = osType == 'ubuntu'
 
 // ── NSG ────────────────────────────────────────────────────────────────────
 resource nsg 'Microsoft.Network/networkSecurityGroups@2023-05-01' = {
@@ -37,16 +47,16 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2023-05-01' = {
   properties: {
     securityRules: [
       {
-        name: osType == 'windows' ? 'allow-rdp' : 'allow-ssh'
+        name: isLinux ? 'allow-ssh' : 'allow-rdp'
         properties: {
           priority: 1000
           protocol: 'Tcp'
           access: 'Allow'
           direction: 'Inbound'
-          sourceAddressPrefix: '*'
+          sourceAddressPrefix: allowedSourceCidr
           sourcePortRange: '*'
           destinationAddressPrefix: '*'
-          destinationPortRange: osType == 'windows' ? '3389' : '22'
+          destinationPortRange: isLinux ? '22' : '3389'
         }
       }
     ]
@@ -72,12 +82,15 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
 }
 
 // ── Public IP ──────────────────────────────────────────────────────────────
+// NOTE: Basic SKU public IPs were retired Sept 30, 2025.
+// Standard SKU is now required and must use Static allocation.
 resource pip 'Microsoft.Network/publicIPAddresses@2023-05-01' = {
   name: pipName
   location: location
-  sku: { name: 'Basic' }
+  sku: { name: 'Standard' }
   properties: {
-    publicIPAllocationMethod: 'Dynamic'
+    publicIPAllocationMethod: 'Static'
+    publicIPAddressVersion: 'IPv4'
     dnsSettings: { domainNameLabel: toLower('${prefix}-${uniqueString(resourceGroup().id)}') }
   }
 }
@@ -106,21 +119,35 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-07-01' = {
   location: location
   properties: {
     hardwareProfile: { vmSize: vmSize }
-    osProfile: {
+    osProfile: isLinux ? {
+      computerName: vmName
+      adminUsername: adminUsername
+      linuxConfiguration: {
+        disablePasswordAuthentication: true
+        ssh: {
+          publicKeys: [
+            {
+              path: '/home/${adminUsername}/.ssh/authorized_keys'
+              keyData: sshPublicKey
+            }
+          ]
+        }
+      }
+    } : {
       computerName: vmName
       adminUsername: adminUsername
       adminPassword: adminPassword
     }
     storageProfile: {
-      imageReference: osType == 'windows' ? {
-        publisher: 'MicrosoftWindowsServer'
-        offer: 'WindowsServer'
-        sku: '2022-datacenter-azure-edition'
-        version: 'latest'
-      } : {
+      imageReference: isLinux ? {
         publisher: 'Canonical'
         offer: '0001-com-ubuntu-server-jammy'
         sku: '22_04-lts-gen2'
+        version: 'latest'
+      } : {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2022-datacenter-azure-edition'
         version: 'latest'
       }
       osDisk: {
@@ -138,4 +165,5 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-07-01' = {
 // ── Outputs ────────────────────────────────────────────────────────────────
 output vmName string = vm.name
 output publicFqdn string = pip.properties.dnsSettings.fqdn
+output publicIp string = pip.properties.ipAddress
 output privateIp string = nic.properties.ipConfigurations[0].properties.privateIPAddress
