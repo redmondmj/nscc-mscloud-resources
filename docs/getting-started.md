@@ -32,9 +32,15 @@ Key limits to be aware of:
 To avoid unexpected charges:
 
 1. In the [Azure Portal](https://portal.azure.com), search for **Cost Management + Billing**.
-2. Select **Budgets** → **+ Add**.
-3. Set a budget amount at or below your monthly credit limit.
-4. Add an alert at **80%** and **100%** of budget, sent to your NSCC email.
+2. Select **Monitoring → Budgets** → **+ Add**.
+3. Set a budget name and amount at or below your monthly credit limit (~CA$200).
+
+   ![Create budget — step 1: name and amount](images/budget-create.png)
+
+4. Click **Next** to reach the **Set alerts** step.
+5. Add an alert threshold at **80%** of budget, with your NSCC email as the recipient. Add a second at **100%** if desired.
+
+   ![Create budget — step 2: set alert threshold and email recipient](images/budget-set-alerts.png)
 
 ---
 

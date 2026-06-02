@@ -117,6 +117,9 @@ Region: Canada East
 ### Step 2 — Invite students as Guest Users
 
 1. Go to **Microsoft Entra ID → Users → New user → Invite external user**.
+
+   ![Entra admin center — New user dropdown showing Invite external user option](images/entra-invite-user-nav.png)
+
 2. Enter the student's email address.
 3. They will receive an invitation email with an "Accept invitation" link.
 4. Once accepted, they appear as Guest users in your tenant.
@@ -126,6 +129,9 @@ Region: Canada East
 1. Open the **RG-Student-Containers** Resource Group.
 2. Go to **Access control (IAM) → Add → Add role assignment**.
 3. On the role selection screen you'll see two tabs: **Job function roles** and **Privileged administrator roles**. **Contributor lives under the Privileged administrator roles tab** — it's not in the default job function list.
+
+   ![Add role assignment — Privileged administrator roles tab showing Contributor](images/iam-privileged-roles-tab.png)
+
 4. Select **Contributor** and proceed to the Members tab.
 5. Select the invited student(s) and save.
 
