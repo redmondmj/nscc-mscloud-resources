@@ -35,7 +35,7 @@ Managed runtimes and data services suitable for application coursework:
 These are entitlements that come with the VS Enterprise subscription itself, independent of the Azure credit:
 
 - **Visual Studio 2022 Enterprise IDE** — full version, all workloads.
-- **Microsoft 365 E5 Developer Tenant** — Exchange Online, Teams, SharePoint, OneDrive, Intune, Entra ID P2, Power BI Pro, full Office desktop apps. **Capped at 25 user licenses.** Renewable, see "Hard ceilings" below.
+- **Microsoft 365 E5 Developer Tenant** — Exchange Online, Teams, SharePoint, OneDrive, Intune, Entra ID P2, Power BI Pro, full Office desktop apps, Defender XDR, Purview compliance tools, and more. **Capped at 25 user licenses.** Renewable, see "Hard ceilings" below. Full service list: [docs/m365-e5-entitlements.md](m365-e5-entitlements.md).
 - **Microsoft Foundry** — unified model catalog and evaluation portal. Serverless API deployments for many models (pay-per-token, against Azure credit).
 - **Microsoft Learn training credit** — confirm current allotment on the benefits page; entitlement has shifted over recent program updates.
 - **Windows 10 / 11 Enterprise dev/test keys** — for use on subscriber-owned hardware or non-Azure VMs.
